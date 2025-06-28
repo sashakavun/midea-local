@@ -46,7 +46,16 @@ class DeviceAttributes(StrEnum):
     softwater = "softwater"
     wrong_operation = "wrong_operation"
     bright = "bright"
-
+    door_auto_open = "door_auto_open"
+    wash_region = "wash_region"
+    version = "version"
+    air = "air"
+    air_status = "air_status"
+    air_set_hour = "air_set_hour"
+    air_left_hour = "air_left_hour"
+    ion_level = "ion_level"
+    ion_status = "ion_status"
+    ion_time_remaining = "ion_time_remaining"
 
 class MideaE1Device(MideaDevice):
     """Midea E1 device."""
@@ -82,7 +91,7 @@ class MideaE1Device(MideaDevice):
                 DeviceAttributes.mode: 0,
                 DeviceAttributes.additional: 0,
                 DeviceAttributes.uv: False,
-                DeviceAttributes.dry: False,
+                DeviceAttributes.dry: None,
                 DeviceAttributes.dry_status: False,
                 DeviceAttributes.door: False,
                 DeviceAttributes.rinse_aid: False,
@@ -101,6 +110,17 @@ class MideaE1Device(MideaDevice):
                 DeviceAttributes.softwater: 0,
                 DeviceAttributes.wrong_operation: None,
                 DeviceAttributes.bright: 0,
+                DeviceAttributes.door_auto_open: False,
+                DeviceAttributes.wash_region: 0,
+                DeviceAttributes.version: None,
+                DeviceAttributes.air: False,
+                DeviceAttributes.air_status: False,
+                DeviceAttributes.air_set_hour: None,
+                DeviceAttributes.air_left_hour: None,
+                DeviceAttributes.ion_level: None,
+                DeviceAttributes.ion_status: None,
+                DeviceAttributes.ion_time_remaining: None,
+
             },
         )
         self._modes = {
@@ -110,10 +130,10 @@ class MideaE1Device(MideaDevice):
             0x03: "Standard Wash",  # BYTE_MODE_STANDARD_WASH
             0x04: "ECO Wash",  # BYTE_MODE_ECO_WASH
             0x05: "Glass Wash",  # BYTE_MODE_GLASS_WASH
-            0x06: "Hour Wash",  # BYTE_MODE_HOUR_WASH
+            0x06: "90 Min Wash",  # BYTE_MODE_90MIN_WASH
             0x07: "Fast Wash",  # BYTE_MODE_FAST_WASH
             0x08: "Soak Wash",  # BYTE_MODE_SOAK_WASH
-            0x09: "90Min",  # BYTE_MODE_90MIN_WASH
+            0x09: "1 Hour Wash",  # BYTE_MODE_HOUR_WASH
             0x0A: "Self Clean",  # BYTE_MODE_SELF_CLEAN
             0x0B: "Fruit Wash",  # BYTE_MODE_FRUIT_WASH
             0x0C: "Self Define",  # BYTE_MODE_SELF_DEFINE
@@ -136,6 +156,17 @@ class MideaE1Device(MideaDevice):
             0x05: "Soft Gear",
         }
         self._progress = ["Idle", "Pre-wash", "Wash", "Rinse", "Dry", "Complete"]
+        self._additional = {
+            0x00: "None",
+            0x01: "Extra Drying",
+            0x03: "Express",
+            0x04: "Power Wash",
+        }
+        self._wash_region = {
+            0x00: "Both Zones",
+            0x01: "Top Zone",
+            0x02: "Bottom Zone",
+        }
 
     def build_query(self) -> list[MessageQuery]:
         """Midea E1 device build query."""

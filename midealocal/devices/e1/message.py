@@ -9,9 +9,12 @@ from midealocal.message import (
     MessageType,
 )
 
-BRIGTH_BYTE = 24
+BRIGHT_BYTE = 24
 STORAGE_REMAINING_BYTE = 18
 HUMIDITY_BYTE = 33
+VERSION_BYTE = 28
+WASH_REGION_BYTE = 35
+ION_BYTE = 45
 
 
 class MessageE1Base(MessageRequest):
@@ -131,10 +134,17 @@ class E1GeneralMessageBody(MessageBody):
         self.lack_bright = (body[5] & 0x02) > 0
         self.lack_softwater = (body[5] & 0x04) > 0
         self.diyflag = (body[4] & 0x08) > 0
+        self.door_auto_open = (body[4] & 0x40) > 0
         self.child_lock = (body[5] & 0x10) > 0
         self.uv = (body[4] & 0x2) > 0
-        self.dry = (body[4] & 0x10) > 0
         self.dry_status = (body[4] & 0x20) > 0
+        dry = (body[4] & 0x10) > 0
+        if self.dry_status:
+            self.dry = 2
+        elif dry:
+            self.dry = 1
+        else:
+            self.dry = 0
         self.storage = (body[5] & 0x20) > 0  # airswitch
         self.storage_status = (body[5] & 0x40) > 0  # airstatus
         self.time_remaining = body[6]
@@ -152,8 +162,10 @@ class E1GeneralMessageBody(MessageBody):
         self.temperature = body[11]
         self.humidity = body[33] if len(body) > HUMIDITY_BYTE else None
         self.doorswitch = (body[5] & 0x01) > 0
-        self.dryswitch = (body[5] & 0x10) > 0
-        self.drystatus = (body[5] & 0x20) > 0
+        self.air = (body[5] & 0x10) > 0
+        self.air_status = (body[5] & 0x20) > 0
+        self.air_set_hour = body[17]
+        self.air_left_hour = body[18]
         self.waterswitch = (body[4] & 0x04) > 0
         self.water_lack = (body[5] & 0x80) > 0
         self.dry_step_switch = (body[4] & 0x01) > 0
@@ -161,7 +173,13 @@ class E1GeneralMessageBody(MessageBody):
         self.error_code = body[10]
         self.softwater = body[13]
         self.wrong_operation = body[16]
-        self.bright = body[24] if len(body) > BRIGTH_BYTE else None
+        self.bright = body[24] if len(body) > BRIGHT_BYTE else None
+        self.version = body[28] if len(body) > VERSION_BYTE else None
+        self.wash_region = body[35] if len(body) > WASH_REGION_BYTE else None
+        if len(body) > ION_BYTE:
+            self.ion_level = body[42]
+            self.ion_status = body[45]
+            self.ion_time_remaining = body[43] * 60 + body[44]
 
 
 class MessageE1Response(MessageResponse):
